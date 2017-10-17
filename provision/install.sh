@@ -37,14 +37,19 @@ sudo apt-get remove docker docker-engine docker.io
 #Add repos
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
 sudo add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
    stable"
 
-# sudo cat <<EOF > /etc/apt/sources.list.d/kubernetes.list
-# deb http://apt.kubernetes.io/ kubernetes-xenial main
-# EOF
+cat <<EOF > /etc/apt/sources.list.d/kubernetes.list
+deb http://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+
+# wget https://packages.cloud.google.com/apt/doc/apt-key.gpg
+# apt-key add apt-key.gpg
 
 
 #Install packages
@@ -61,6 +66,10 @@ sudo ln -s /usr/local/go/bin/* /usr/local/bin/ && \
 go version &&\
 sudo mkdir /go/ &&\
 export GOPATH=/go/
+
+#Install docker compose
+sudo sh -c "curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
+sudo chmod +x /usr/local/bin/docker-compose
 
 #ETCD installation
 wget -nv https://github.com/coreos/etcd/releases/download/${ETCD_VERSION}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz
@@ -83,7 +92,6 @@ EOF
 
 sudo systemctl enable etcd
 sudo systemctl start etcd
-
 
 #Docker registry - certs
 
@@ -116,7 +124,8 @@ subjectAltName = @alt_names
 [ alt_names ]
 DNS.1 = cilium.io
 DNS.2 = *.cilium.io
-IP.1 = 192.168.36.11a
+DNS.3 = k8s1
+IP.1 = 192.168.36.11
 IP.2 = 10.0.2.15
 EOF
 
